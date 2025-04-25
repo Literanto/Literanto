@@ -1,3 +1,0 @@
-INSERT INTO USERS (user_name, user_email, user_password, user_token, token_expiration)
-VALUES
-('TESTE', 'teste@gmail.com', '123', 'alksdasdadasj1324290', '2024-03-21 15:30:00');
