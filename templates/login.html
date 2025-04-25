@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Literanto</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+        
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="login" v-cloak>
+        <div class="alert text-center custom-alert">
+            Literanto - Sua biblioteca pessoal online
+        </div>
+        <div class="container p-3 center-container">
+            <div class="sub-container left-container">
+                <img src="../static/Literanto2.jpg" alt="Library Image" class="library-image">
+            </div>
+            <div class="sub-container right-container">
+                <div class="login-form">
+                    <h2 class="login-heading">Faça Login</h2>
+                    <div class="scroll-area">
+                        <div v-if="message" class="alert" :class="{'alert-success': !isError, 'alert-danger': isError}" aria-live="polite">
+                            [[ message ]]
+                        </div>
+                        <form @submit.prevent="login">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input id="email" type="email" v-model="email" class="form-control"
+                                    placeholder="Insira seu email" required autocomplete="email"
+                                    @input="clearMessage">
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Senha</label>
+                                <input id="password" type="password" v-model="password" class="form-control"
+                                    placeholder="Insira sua senha" required autocomplete="current-password"
+                                    @input="clearMessage">
+                            </div>
+                            <button type="submit" class="login-button" :disabled="isLoading">
+                                [[ isLoading ? 'Entrando...' : 'Login' ]]
+                            </button>
+                            <div class="signup-link">
+                                Novo por aqui? <a href="/register">Registrar-se</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+
+</html>

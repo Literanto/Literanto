@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Literanto</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+    <div id="dashboard" v-cloak class="dashboard-wrapper d-flex">
+        
+        <div class="top-bar">
+            <h7>Literanto - Dashboard</h7>
+        </div>
+
+        <div class="main-wrapper">
+            <nav class="sidebar">
+                <div class="sidebar-header mb-4">
+                    <h4>Menu</h4>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link text-white" @click.prevent="setPage('home')">🏠 Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link text-white" @click.prevent="setPage('myStories')">📚 Minhas Histórias</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link text-white" @click.prevent="setPage('favorites')">⭐ Favoritos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link text-white" @click.prevent="setPage('drafts')">📝 Rascunhos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link text-white" @click.prevent="setPage('profile')">👤 Perfil</a>
+                    </li>
+                    <li class="nav-item mt-4">
+                        <a href="{{ url_for('logout') }}" class="nav-link text-danger">🚪 Sair</a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="main-content">
+                <header class="dashboard-header mb-4 d-flex justify-content-between align-items-center">
+                    <h2>Bem-vindo(a), [[ username ]]</h2>
+                </header>
+
+                <div v-if="currentPage === 'home'">
+                    <h8>📊 Visão Geral</h8>
+                    <p>Aqui você verá estatísticas, atividades recentes, conquistas, etc.</p>
+                </div>
+
+                <div v-if="currentPage === 'myStories'">
+                    <h4>📚 Minhas Histórias</h4>
+                    <p>Listagem e gerenciamento das suas histórias.</p>
+                </div>
+
+                <div v-if="currentPage === 'favorites'">
+                    <h4>⭐ Favoritos</h4>
+                    <p>Histórias que você marcou como favoritas.</p>
+                </div>
+
+                <div v-if="currentPage === 'drafts'">
+                    <h4>📝 Rascunhos</h4>
+                    <p>Seus rascunhos ainda não publicados.</p>
+                </div>
+
+                <div v-if="currentPage === 'profile'">
+                    <h4>👤 Perfil</h4>
+                    <p>Informações pessoais e opções de edição.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: "#dashboard",
+            delimiters: ["[[", "]]"],
+            data: {
+                username: "Fulana",
+                currentPage: "home"
+            },
+            methods: {
+                setPage(page) {
+                    this.currentPage = page;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
