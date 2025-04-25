@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Literanto</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        crossorigin="anonymous">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+</head>
+
+<body>
+    <div id="landing" v-cloak class="landing-wrapper">
+
+        <header class="landing-header">
+            <div class="header-inner">
+                <div class="logo-title">Literanto</div>
+                <div class="auth-buttons">
+                    <a href="{{ url_for('login') }}" class="auth-link">Login</a>
+                    <a href="{{ url_for('register') }}" class="auth-link">Cadastro</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="landing-content">
+            <h1 class="landing-title">Onde histórias ganham vida.</h1>
+            <p class="landing-subtitle">Descubra, compartilhe e viva mil mundos em palavras.</p>
+        </main>
+    </div>
+</body>
+
+</html>
