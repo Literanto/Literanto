@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+
+    <!-- Bootstrap e ícones -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <div id="dashboard" v-cloak>       
+        <!-- TOPO -->
+        <div class="top-bar d-flex justify-content-between align-items-center px-3">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-link text-white mr-3" @click="toggleSidebar" style="font-size: 24px;">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <strong>Literanto - Sua biblioteca pessoal online</strong>
+            </div>
+            <div class="d-flex align-items-center top-bar-tools">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="form-control search-input" placeholder="  Buscar...">
+                </div>
+                <button class="btn btn-link text-white" style="font-size: 22px;">
+                    <i class="fas fa-bell"></i>
+                </button>
+            </div>
+        </div>        
+
+        <!-- CONTEÚDO -->
+        <div class="main-wrapper">
+            <!-- SIDEBAR -->
+            <nav class="sidebar" v-show="!isSidebarCollapsed">
+                <div class="sidebar-header d-flex align-items-center p-3" style="background-color: #6e5181;">
+                    <img src="{{ url_for('static', filename='img/profile_default.png') }}" 
+                         alt="Foto de Perfil" 
+                         class="rounded-circle mr-2" 
+                         style="width: 40px; height: 40px; object-fit: cover;">
+                    <a href="#" @click.prevent="setPage('profile')" class="text-white font-weight-bold" style="text-decoration: none;">
+                        @[[ arroba ]]
+                    </a>
+                </div>
+
+                <ul class="nav flex-column mt-3">
+                    <li class="nav-item">
+                        <a href="{{ url_for('dashboard') }}" class="nav-link text-white">
+                            <i class="fas fa-compass mr-2"></i> <span v-if="!isSidebarCollapsed">Descobrir</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link text-white">
+                            <i class="fas fa-book mr-2"></i> <span v-if="!isSidebarCollapsed">Biblioteca</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/my-stories" class="nav-link text-white">
+                            <i class="fas fa-feather-alt mr-2"></i> <span v-if="!isSidebarCollapsed">Minhas Histórias</span>
+                        </a>                        
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link text-white" @click.prevent="setPage('history')">
+                            <i class="fas fa-history mr-2"></i> <span v-if="!isSidebarCollapsed">Histórico</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link text-white" @click.prevent="setPage('settings')">
+                            <i class="fas fa-cog mr-2"></i> <span v-if="!isSidebarCollapsed">Configurações</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mt-4">
+                        <a href="#" class="nav-link text-danger" @click.prevent="logout">
+                            <i class="fas fa-sign-out-alt mr-2"></i> <span v-if="!isSidebarCollapsed">Sair</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- CONTEÚDO PRINCIPAL -->
+            <div class="main-content">
+                <div class="content-wrapper">
+                    <div v-if="currentPage === 'story'" class="container mt-4">
+                        <!-- Abas: Detalhes / Capítulos -->
+                        <div class="d-flex border-bottom mb-3">
+                            <button 
+                                class="btn btn-link mr-3" 
+                                :class="{ 'font-weight-bold text-dark': storySection === 'detalhes', 'text-muted': storySection !== 'detalhes' }" 
+                                @click="storySection = 'detalhes'">
+                                Detalhes da História
+                            </button>
+                            <button 
+                                class="btn btn-link" 
+                                :class="{ 'font-weight-bold text-dark': storySection === 'capitulos', 'text-muted': storySection !== 'capitulos' }" 
+                                @click="storySection = 'capitulos'">
+                                Capítulos
+                            </button>
+                        </div>
+                    
+                        <!-- Aba: Detalhes -->
+                        <div v-if="storySection === 'detalhes'">
+                            <div class="form-group">
+                                <label for="titulo">Título</label>
+                                <input type="text" id="titulo" v-model="story.titulo" class="form-control" placeholder="Digite o título da história">
+                            </div>
+                            <div class="form-group">
+                                <label for="descricao">Sinopse</label>
+                                <textarea id="descricao" v-model="story.descricao" class="form-control" rows="3" placeholder="Escreva uma sinopse da história..."></textarea>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button class="btn btn-secondary mr-2" @click="salvarComoRascunho">Salvar como rascunho</button>
+                                <button class="btn btn-primary" @click="publicarHistoria">Publicar</button>
+                            </div>
+                        </div>
+                    
+                        <!-- Aba: Capítulos -->
+                        <div v-if="storySection === 'capitulos'">
+                            <button class="btn btn-success mb-3" @click="adicionarCapitulo">+ Adicionar Capítulo</button>
+                            <ul class="list-group">
+                                <li v-for="(capitulo, index) in story.capitulos" :key="index" class="list-group-item">
+                                    Capítulo [[ index + 1 ]]
+                                </li>
+                            </ul>
+                        </div>
+                    </div> 
+                </div>
+            </div> <!-- FIM do main-content -->
+        </div> <!-- FIM do main-wrapper -->
+
+        <!-- RODAPÉ -->
+        <footer class="text-center py-3">
+            &copy; 2025 Literanto. Todos os direitos reservados.
+        </footer>
+    </div> <!-- FIM do #dashboard -->
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='js/story.js') }}"></script>
+</body>
+</html>

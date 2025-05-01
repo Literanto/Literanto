@@ -1,8 +1,174 @@
-CREATE TABLE IF NOT EXISTS users (
-    user_code SERIAL PRIMARY KEY,
-    user_name VARCHAR(50) UNIQUE NOT NULL,
-    user_email VARCHAR(255) UNIQUE NOT NULL,
-    user_password VARCHAR(100) NOT NULL,
-	user_token VARCHAR(255),
-	token_expiration TIMESTAMP
-)
+CREATE TABLE images (
+    image_id SERIAL PRIMARY KEY,
+    file_path VARCHAR(255) UNIQUE NOT NULL,
+    image_type VARCHAR(50) CHECK (image_type IN ('profile', 'cover', 'other')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_images_file_path ON images(file_path);
+CREATE INDEX idx_images_image_type ON images(image_type);
+
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    arroba VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    bio TEXT,
+    profile_image_id INTEGER DEFAULT 1 REFERENCES images(image_id),
+    date_of_birth DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE stories (
+    story_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(user_id),
+    cover_image_id INTEGER DEFAULT 1 REFERENCES images(image_id),
+    title VARCHAR(255) NOT NULL,
+    synopsis TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    published_at TIMESTAMP,
+    status VARCHAR(50) CHECK (status IN ('draft', 'published', 'in_review', 'archived')) DEFAULT 'draft',
+    views_count INTEGER DEFAULT 0
+);
+
+CREATE TABLE chapters (
+    chapter_id SERIAL PRIMARY KEY,
+    story_id INTEGER NOT NULL REFERENCES stories(story_id),
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    chapter_number INTEGER,
+    published_at TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    word_count INTEGER GENERATED ALWAYS AS (length(content) - length(replace(content, ' ', '')) + 1) STORED
+);
+
+CREATE INDEX idx_stories_user_id ON stories(user_id);
+CREATE INDEX idx_stories_title ON stories(title);
+CREATE INDEX idx_chapters_story_id ON chapters(story_id);
+CREATE INDEX idx_chapters_title ON chapters(title);
+
+CREATE TABLE followers (
+    follower_user_id INTEGER NOT NULL REFERENCES users(user_id),
+    followed_user_id INTEGER NOT NULL REFERENCES users(user_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (follower_user_id, followed_user_id)
+);
+
+CREATE TABLE likes (
+    user_id INTEGER NOT NULL REFERENCES users(user_id),
+    story_id INTEGER NOT NULL REFERENCES stories(story_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, story_id)
+);
+
+CREATE TABLE favorites (
+    user_id INTEGER NOT NULL REFERENCES users(user_id),
+    story_id INTEGER NOT NULL REFERENCES stories(story_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    folder VARCHAR(100),
+    PRIMARY KEY (user_id, story_id)
+);
+
+CREATE TABLE reading_history (
+    user_id INTEGER NOT NULL REFERENCES users(user_id),
+    story_id INTEGER NOT NULL REFERENCES stories(story_id),
+    last_chapter_read INTEGER REFERENCES chapters(chapter_id),
+    progress DECIMAL(5, 2) CHECK (progress >= 0 AND progress <= 1),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    finished BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (user_id, story_id)
+);
+
+CREATE INDEX idx_followers_follower_user_id ON followers(follower_user_id);
+CREATE INDEX idx_followers_followed_user_id ON followers(followed_user_id);
+CREATE INDEX idx_likes_user_id ON likes(user_id);
+CREATE INDEX idx_likes_story_id ON likes(story_id);
+CREATE INDEX idx_favorites_user_id ON favorites(user_id);
+CREATE INDEX idx_favorites_story_id ON favorites(story_id);
+CREATE INDEX idx_reading_history_user_id ON reading_history(user_id);
+CREATE INDEX idx_reading_history_story_id ON reading_history(story_id);
+
+CREATE TABLE genres (
+    genre_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE tags (
+    tag_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE story_genre (
+    story_id INTEGER NOT NULL REFERENCES stories(story_id),
+    genre_id INTEGER NOT NULL REFERENCES genres(genre_id),
+    PRIMARY KEY (story_id, genre_id)
+);
+
+CREATE TABLE story_tag (
+    story_id INTEGER NOT NULL REFERENCES stories(story_id),
+    tag_id INTEGER NOT NULL REFERENCES tags(tag_id),
+    PRIMARY KEY (story_id, tag_id)
+);
+
+CREATE TABLE comments (
+    comment_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(user_id),
+    chapter_id INTEGER NOT NULL REFERENCES chapters(chapter_id),
+    parent_comment_id INTEGER REFERENCES comments(comment_id),
+    text TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE messages (
+    message_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(user_id),
+    sender_id INTEGER REFERENCES users(user_id),
+    receiver_id INTEGER REFERENCES users(user_id),
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    read BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE notifications (
+    notification_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(user_id),
+    notification_type VARCHAR(50) CHECK (notification_type IN ('like', 'comment', 'follow', 'message', 'update')) NOT NULL,
+    message TEXT NOT NULL,
+    story_id INTEGER REFERENCES stories(story_id),
+    comment_id INTEGER REFERENCES comments(comment_id),
+    message_id INTEGER REFERENCES messages(message_id),
+    read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    read_at TIMESTAMP
+);
+
+CREATE TABLE logs (
+    log_id SERIAL PRIMARY KEY,
+    table_affected VARCHAR(100) NOT NULL,
+    record_id INTEGER NOT NULL,
+    action VARCHAR(50) CHECK (action IN ('CREATE', 'UPDATE', 'DELETE', 'SOFT_DELETE')) NOT NULL,
+    previous_data JSONB,
+    new_data JSONB,
+    ip_address VARCHAR(100),
+    user_agent VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id INTEGER REFERENCES users(user_id)
+);
+
+CREATE INDEX idx_story_genre_story_id ON story_genre(story_id);
+CREATE INDEX idx_story_genre_genre_id ON story_genre(genre_id);
+CREATE INDEX idx_story_tag_story_id ON story_tag(story_id);
+CREATE INDEX idx_story_tag_tag_id ON story_tag(tag_id);
+CREATE INDEX idx_comments_user_id ON comments(user_id);
+CREATE INDEX idx_comments_chapter_id ON comments(chapter_id);
+
+CREATE INDEX idx_messages_user_id ON messages(user_id);
+CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX idx_notifications_story_id ON notifications(story_id);
+CREATE INDEX idx_logs_table_affected ON logs(table_affected);
+CREATE INDEX idx_logs_record_id ON logs(record_id);
+CREATE INDEX idx_logs_action ON logs(action);

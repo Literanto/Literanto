@@ -1,38 +1,33 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for, session
-from flask_bcrypt import Bcrypt
+from flask import Flask, request, session, jsonify, render_template, redirect, url_for
 from flask_cors import CORS
 import logging
-from datetime import datetime
-
-from dbCommands.dbQueries import insert_user, get_user_by_email
+from dbQueries import (login_user, logout_user, register_user, create_story,
+                       get_stories, get_story_by_id, update_story, delete_story)
 
 app = Flask(__name__)
-bcrypt = Bcrypt(app)
-CORS(app)
 
-app.secret_key = 'teste'
+SECRET_KEY = 'gatinhos'
+app.secret_key = SECRET_KEY
+
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "allow_headers": ["Authorization", "Content-Type"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    }
+})
 
 logging.basicConfig(level=logging.INFO)
 
-def check_token():
-    user_token = session.get('user_token')
-    token_expiration = session.get('token_expiration')
-
-    if user_token and token_expiration:
-        if isinstance(token_expiration, str):
-            try:
-                token_expiration = datetime.strptime(token_expiration, '%Y-%m-%d %H:%M:%S')
-            except ValueError as e:
-                logging.error(f"Erro ao converter token_expiration: {e}")
-                return False
-
-        if datetime.now() > token_expiration:
-            session.clear()
-            return False
-
-        return True
-
-    return False
+@app.route('/check_session')
+def check_session():
+    if 'user_id' in session:
+        return jsonify({
+            'logged_in': True,
+            'username': session.get('username', 'Convidado'),
+            'arroba': session.get('arroba', 'desconhecido')
+        })
+    return jsonify({'logged_in': False})
 
 @app.route('/')
 def landing():
@@ -42,67 +37,35 @@ def landing():
 def login():
     if request.method == 'GET':
         return render_template('login.html')
+    return login_user()
 
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-
-    if not email or not password:
-        return jsonify({"status": "error"}), 400
-
-    user = get_user_by_email(email)
-    if not user:
-        return jsonify({"status": "error"}), 401
-
-    stored_password = user["user_password"]
-    password_match = bcrypt.check_password_hash(stored_password, password)
-
-    if not password_match:
-        return jsonify({"status": "error"}), 401
-
-    session['user_id'] = user["user_code"]
-    session['user_email'] = email
-
-    return jsonify({
-        "status": "success",
-        "redirect": url_for('dashboard')
-    }), 200
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'GET':
-        return render_template('register.html')
-
-    data = request.get_json()
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password')
-
-    if not username or not email or not password:
-        return jsonify({"status": "error"}), 400
-
-    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-
-    success = insert_user(username, email, hashed_password)
-    if success:
-        return jsonify({
-            "status": "success",
-            "redirect": url_for('login')
-        }), 200
-    else:
-        return jsonify({"status": "error"}), 400
+@app.route('/logout', methods=['POST'])
+def logout():
+    return logout_user()
 
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', username=session.get('username'))
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'GET':
+        return render_template('register.html')
+    return register_user()
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
+@app.route('/my-stories')
+def my_stories():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('myStories.html')
+
+@app.route('/story')
+def story():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('story.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

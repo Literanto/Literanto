@@ -53,16 +53,17 @@ new Vue({
                 });
 
                 if (response.data.status === 'success') {
+                
                     this.message = loginMessages.success;
                     this.isError = false;
-
+                
                     this.email = '';
                     this.password = '';
-
+                
                     setTimeout(() => {
                         window.location.href = response.data.redirect || '/dashboard';
                     }, 2000);
-                } else {
+                }else {
                     this.message = response.data.message || loginMessages.genericError;
                     this.isError = true;
                 }
@@ -78,14 +79,6 @@ new Vue({
             } finally {
                 this.isLoading = false;
             }
-        }
-    },
-
-    created() {
-        if (sessionStorage.getItem('loggedOut') === 'true') {
-            sessionStorage.removeItem('loggedOut');
-            this.message = '';
-            this.isError = false;
         }
     }
 });

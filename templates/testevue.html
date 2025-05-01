@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Teste Vue</title>
+  <script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
+  <style>
+    [v-cloak] { display: none; }
+  </style>
+</head>
+<body>
+  <div id="app" v-cloak>
+    <h1>Vue Funcionando?</h1>
+    <p>{{ mensagem }}</p>
+  </div>
+
+  <script>
+    new Vue({
+      el: "#app",
+      data: {
+        mensagem: "Sim! 🎉"
+      }
+    });
+  </script>
+</body>
+</html>

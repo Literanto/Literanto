@@ -1,97 +1,116 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Literanto</title>
 
+    <!-- Vue e Axios -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+    <!-- Estilos personalizados -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-</head>
-<body>
-    <div id="dashboard" v-cloak class="dashboard-wrapper d-flex">
-        
-        <div class="top-bar">
-            <h7>Literanto - Dashboard</h7>
-        </div>
 
-        <div class="main-wrapper">
-            <nav class="sidebar">
-                <div class="sidebar-header mb-4">
-                    <h4>Menu</h4>
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        [v-cloak] { display: none; }
+    </style>
+</head>
+
+<body>
+    <div id="dashboard" v-cloak>        
+        <div class="top-bar d-flex justify-content-between align-items-center px-3">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-link text-white mr-3" @click="toggleSidebar" style="font-size: 24px;"
+                ><i class="fas fa-bars"></i>
+                </button>
+                <strong>Literanto - Sua biblioteca pessoal online</strong>
+            </div>
+            <div class="d-flex align-items-center top-bar-tools">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="form-control search-input" placeholder="  Buscar...">
                 </div>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a href="#" class="nav-link text-white" @click.prevent="setPage('home')">🏠 Início</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link text-white" @click.prevent="setPage('myStories')">📚 Minhas Histórias</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link text-white" @click.prevent="setPage('favorites')">⭐ Favoritos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link text-white" @click.prevent="setPage('drafts')">📝 Rascunhos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link text-white" @click.prevent="setPage('profile')">👤 Perfil</a>
-                    </li>
-                    <li class="nav-item mt-4">
-                        <a href="{{ url_for('logout') }}" class="nav-link text-danger">🚪 Sair</a>
-                    </li>
-                </ul>
-            </nav>
+                <button class="btn btn-link text-white" style="font-size: 22px;">
+                    <i class="fas fa-bell"></i></button>
+            </div>
+        </div>        
+
+       <div class="main-wrapper">
+        <nav class="sidebar" v-show="!isSidebarCollapsed">
+            <div class="sidebar-header d-flex align-items-center p-3" style="background-color: #6e5181;">
+                <img src="{{ url_for('static', filename='img/profile_default.png') }}" 
+                     alt="Foto de Perfil" 
+                     class="rounded-circle mr-2" 
+                     style="width: 40px; height: 40px; object-fit: cover;">
+                     <a href="#" @click.prevent="setPage('profile')" class="text-white font-weight-bold" style="text-decoration: none;">
+                        @[[ arroba ]]
+                    </a>
+            </div>
+        
+            <ul class="nav flex-column mt-3">
+                <li class="nav-item">
+                    <a href="{{ url_for('dashboard') }}" class="nav-link text-white">
+                        <i class="fas fa-compass mr-2"></i> <span v-if="!isSidebarCollapsed">Descobrir</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link text-white" @click.prevent="setPage('library')">
+                        <i class="fas fa-book mr-2"></i> <span v-if="!isSidebarCollapsed">Biblioteca</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                <a href="{{ url_for('my_stories') }}" class="nav-link text-white">
+                        <i class="fas fa-feather-alt mr-2"></i> <span v-if="!isSidebarCollapsed">Minhas Histórias</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link text-white" @click.prevent="setPage('history')">
+                        <i class="fas fa-history mr-2"></i> <span v-if="!isSidebarCollapsed">Histórico</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link text-white" @click.prevent="setPage('settings')">
+                        <i class="fas fa-cog mr-2"></i> <span v-if="!isSidebarCollapsed">Configurações</span>
+                    </a>
+                </li>
+                <li class="nav-item mt-4">
+                    <a href="#" class="nav-link text-danger" @click.prevent="logout">
+                        <i class="fas fa-sign-out-alt mr-2"></i> <span v-if="!isSidebarCollapsed">Sair</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
             <div class="main-content">
-                <header class="dashboard-header mb-4 d-flex justify-content-between align-items-center">
-                    <h2>Bem-vindo(a), [[ username ]]</h2>
-                </header>
+                <div class="content-wrapper">
+                    <header class="dashboard-header mb-4">
+                        <h2>Boas vindas ao Literanto, [[ username ]]...</h2>
+                    </header>
 
-                <div v-if="currentPage === 'home'">
-                    <h8>📊 Visão Geral</h8>
-                    <p>Aqui você verá estatísticas, atividades recentes, conquistas, etc.</p>
-                </div>
+                    <div v-if="currentPage === 'home'">
+                        <hs4><i class="fas fa-chart-pie"></i> Visão Geral</h4>
+                        <p>Aqui você verá estatísticas, atividades recentes, conquistas, etc.</p>
+                    </div>
 
-                <div v-if="currentPage === 'myStories'">
-                    <h4>📚 Minhas Histórias</h4>
-                    <p>Listagem e gerenciamento das suas histórias.</p>
-                </div>
-
-                <div v-if="currentPage === 'favorites'">
-                    <h4>⭐ Favoritos</h4>
-                    <p>Histórias que você marcou como favoritas.</p>
-                </div>
-
-                <div v-if="currentPage === 'drafts'">
-                    <h4>📝 Rascunhos</h4>
-                    <p>Seus rascunhos ainda não publicados.</p>
-                </div>
-
-                <div v-if="currentPage === 'profile'">
-                    <h4>👤 Perfil</h4>
-                    <p>Informações pessoais e opções de edição.</p>
-                </div>
+                </div> 
             </div>
         </div>
+
+        <footer>
+            &copy; 2025 Literanto. Todos os direitos reservados.
+        </footer>
     </div>
 
-    <script>
-        new Vue({
-            el: "#dashboard",
-            delimiters: ["[[", "]]"],
-            data: {
-                username: "Fulana",
-                currentPage: "home"
-            },
-            methods: {
-                setPage(page) {
-                    this.currentPage = page;
-                }
-            }
-        });
-    </script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
+
 </html>

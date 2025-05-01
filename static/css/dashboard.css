@@ -1,57 +1,131 @@
+[v-cloak] {
+    display: none;
+}
+
+.nav-link i {
+        color: white;
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+}
+
+.nav-link {
+        color: white;
+}
+
+.nav-link:hover {
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+
 #dashboard {
     width: 100%;
     height: 100%;
-    background-color: #6d85a5;
+    background-color: #98b4d7;
     display: flex;
     flex-direction: column;
+    font-family: 'Arial', sans-serif;
+}
+
+.top-bar-search {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    height: 100%;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 30px;
+}
+
+.search-input:focus {
+    padding-left: 10px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    font-size: 16px;
+    color: #0d001a;
+    pointer-events: none;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+.search-input {
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    padding-left: 30px;
+    padding-right: 2px;
+    height: 30px;
+    border-radius: 4px;
+    border: none;
+    background-color: #98b4d7;
+    color: #0d001a;
+    width: 180px;
+}
+
+.search-input::placeholder {
+    color: #0d001a;
+    opacity: 0.6;
+}
+
+.search-wrapper:has(.search-input:focus) .search-icon {
+    opacity: 0;
 }
 
 .top-bar {
     width: 100%;
     background-color: #2e0a30;
-    color: #B2A395;
-    padding: 10px;
+    color: #ffffff;
+    padding: 15px;
     text-align: center;
     font-family: 'Birds', sans-serif;
-    font-size: 30px;
+    font-size: 28px;
     font-weight: bold;
-    margin-bottom: 20px;
     letter-spacing: 1px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .main-wrapper {
     display: flex;
     flex: 1;
-    margin-top: -20px;
 }
 
 .sidebar {
-    width: 250px;
+    width: 220px;
     background-color: #4f1446;
     color: #B2A395;
-    padding: 7px;
-    box-shadow: 4px 0px 10px rgba(0, 0, 0, 0.1);
+    padding: 5px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    box-shadow: 4px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 0px;
+    transition: width 0.3s ease;
 }
 
 .sidebar-header h4 {
-    font-family: 'Arial', sans-serif;
-    font-size: 24px;
-    color: #B2A395;
-    margin-bottom: 10px;
+    font-size: 22px;
+    color: #f9f4fd;
+    margin-bottom: 20px;
+    font-family: 'Birds', sans-serif;
 }
 
 .nav-item a {
-    color: #B2A395;
+    color: #ffffff;
     text-decoration: none;
-    padding: 10px;
-    border-radius: 5px;
-    margin: 8px 0;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin: 6px 0;
     font-size: 16px;
     font-weight: bold;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    display: block;
 }
 
 .nav-item a:hover {
@@ -59,48 +133,65 @@
     color: #ffffff;
 }
 
-.nav-item a.text-danger {
-    color: #F44336;
+.nav-item a.text-danger:hover {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.sidebar.collapsed .nav-link {
+    text-align: center;
+    padding-left: 0;
+    font-size: 0;
+}
+
+.sidebar.collapsed .nav-link::before {
+    content: attr(data-icon);
+    display: inline-block;
+    font-size: 20px;
 }
 
 .main-content {
     flex-grow: 1;
-    padding: 20px;
-    background-color: #6d85a5;
+    background-color: #ffffff;
     color: #0d001a;
-    border-radius: 10px;
-    margin-left: 20px;
+    border-radius: 5px;
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    margin: 40px 100px 0 100px;
+}
+
+.content-wrapper {
+    max-width: none;
+    width: 100%;
+    padding: 0 30px 0 50px;
+    margin: 50px 0 0 0; 
 }
 
 .dashboard-header h2 {
     font-family: 'Birds', sans-serif;
-    font-size: 30px;
-    color: #0d001a;
+    font-size: 35px;
+    color: #2e0a30;
+    margin-bottom: 20px;
 }
 
 h4 {
-    font-family: 'Arial', sans-serif;
-    font-size: 20px;
-    color: #0d001a;
-    margin-bottom: 15px;
-}
-
-h7 {
-    font-family: 'Birds', sans-serif;
-    font-size: 20px;
-    color: #f9f4fd;
-    margin-bottom: 15px;
-}
-
-h8 {
-    font-family: 'Arial', sans-serif;
-    font-size: 30px;
-    color: #0d001a;
-    margin-bottom: 20px;
+    font-size: 22px;
+    color: #2e0a30;
+    font-weight: bold;
+    margin-bottom: 10px;
 }
 
 p {
     color: #0d001a;
+    font-size: 16px;
+    line-height: 1.6;
 }
 
 footer {
@@ -108,6 +199,5 @@ footer {
     color: #B2A395;
     background-color: #2e0a30;
     padding: 10px;
-    margin-top: 20px;
     font-size: 14px;
 }
